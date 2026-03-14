@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: bench-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bench
+    ports:
+      - "5432:5432"
+    command:
+      - "postgres"
+      - "-c"
+      - "fsync=on"
+      - "-c"
+      - "synchronous_commit=on"
+      - "-c"
+      - "full_page_writes=on"
+      - "-c"
+      - "wal_level=replica"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: bench-surrealdb
+    restart: unless-stopped
+    command:
+      - "start"
+      - "--bind"
+      - "0.0.0.0:8000"
+      - "--user"
+      - "root"
+      - "--pass"
+      - "root"
+      - "--strict"
+      - "rocksdb:/data/benchmark.db"
+    environment:
+      SURREAL_SYNC_DATA: "true"
+      SURREAL_LOG: info
+    ports:
+      - "8000:8000"
+    volumes:
+      - surreal_data:/data
+
+volumes:
+  postgres_data:
+  surreal_data:
